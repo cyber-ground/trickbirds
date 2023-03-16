@@ -31,7 +31,6 @@ function flipCard() {
     if(lockBoard) return;            
     if(this === firstCard) return;     
   this.classList.add('js_flip');
-  
   if(!hasFlippedCard) {
     hasFlippedCard = true;
     firstCard = this;
@@ -90,7 +89,7 @@ function gameOver() {
 function gameOverCounter() {   
   if(unMatched === 10) {  // game over count !!   
     gameOver();                 
-  }                                                             
+  }
 }
 
 function disableCards() {

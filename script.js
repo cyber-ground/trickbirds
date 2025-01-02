@@ -12,26 +12,43 @@ const startBtn = document.querySelector('.start-btn');
   const gameClearMessage = document.querySelector('.game-clear');
   const gameOverMessage = document.querySelector('.game-over');
 const cards = document.querySelectorAll('.memory-card');
-
-  cards.forEach(card => {
-    card.addEventListener('click', flipCard);
-  });
-
-  startBtn.addEventListener('click', function () {
-    window.location.reload();
-  });
-
-let hasFlippedCard = false; 
-let lockBoard = false;
+let hasFlippedCard, lockBoard; 
 let firstCard, secondCard;
-let matched = 0;
-let unMatched = 0;
+let matched,unMatched;
+
+  var bgmHowl = new Howl({src: ['mp3/bgm.mp3'], loop:true, volume: 0.05});
+  var flipCardHowl = new Howl({src: ['mp3/flipCard.mp3'], volume: 0.5});
+  var unmatchedHowl = new Howl({src: ['mp3/unmatched.mp3'], volume: 0.5});
+  var matchedHowl = new Howl({src: ['mp3/matched.mp3'], volume: 0.5});
+  var clearHowl = new Howl({src: ['mp3/clear.mp3'], volume: 0.1});
+  var gameClearHowl = new Howl({src: ['mp3/gameClear.mp3'], volume: 0.1});
+  var overHowl = new Howl({src: ['mp3/over.mp3'], volume: 0.1});
+  var gameOverHowl = new Howl({src: ['mp3/gameOver.mp3'], volume: 0.1});
+  
+  startBtn.classList.add('js_visible'); //*>
+  startBtn.addEventListener('click', function () {
+    cards.forEach(card => {
+      card.classList.remove('js_flip');
+      card.addEventListener('click', flipCard);
+    });
+    startBtn.classList.remove('js_visible');
+    gameClearMessage.classList.remove('js_visible');
+    gameOverMessage.classList.remove('js_visible');
+    startBtn.classList.add('active');
+    shuffleCards();
+    hasFlippedCard = false; 
+    lockBoard = false;
+    matched = 0;
+    unMatched = 0;
+    bgmHowl.play();
+  });
 
 
 function flipCard() {
     if(lockBoard) return;            
     if(this === firstCard) return;     
   this.classList.add('js_flip');
+  flipCardHowl.play();
   if(!hasFlippedCard) {
     hasFlippedCard = true;
     firstCard = this;
@@ -52,6 +69,7 @@ function matchedCards() {
   firstCard.removeEventListener('click', flipCard);
   secondCard.removeEventListener('click', flipCard);
   matched++;
+  setTimeout(() => { matchedHowl.play()}, 300);
   gameClear();
 }
 
@@ -60,11 +78,12 @@ function unMatchedCards() {
   setTimeout(() => {
     firstCard.classList.remove('js_flip');
     secondCard.classList.remove('js_flip');
+    unmatchedHowl.play();
     lockBoard = false;
     firstCard = null;
     unMatched++; 
     gameOverCounter();
-  }, 1000);  // unflip speed 1500 
+  }, 1000); 
 }
 
 function gameClear() {
@@ -72,6 +91,9 @@ function gameClear() {
     setTimeout(() => {
       gameClearMessage.classList.add('js_visible');
       disableCards();
+      bgmHowl.stop();
+      setTimeout(() => { clearHowl.play()}, 800);
+      setTimeout(() => { gameClearHowl.play()}, 2000);
       setTimeout(() => {
         startBtn.classList.add('js_visible');
       }, 3000);
@@ -80,15 +102,18 @@ function gameClear() {
 }
 
 function gameOver() {        
-  gameOverMessage.classList.add('js_visible');                  
-  disableCards();                        
+  gameOverMessage.classList.add('js_visible');  
+  disableCards();  
+  bgmHowl.stop();
+  setTimeout(() => { overHowl.play()}, 800);
+  setTimeout(() => { gameOverHowl.play() }, 3700);
   setTimeout(() => {
     startBtn.classList.add('js_visible');                            
   }, 1500);  
 }
 
 function gameOverCounter() {   
-  if(unMatched === 10) {  // game over count !!   
+  if(unMatched === 10) {    
     gameOver();                 
   }                                                             
 }
@@ -97,7 +122,7 @@ function disableCards() {
   cards.forEach(card => {                       
     card.removeEventListener('click', flipCard);
   });
-} // GAME CLEAR. GAME OVER.時に クリックを解除!
+} 
 
 function shuffleCards() {
   const number = [];
